@@ -1,8 +1,10 @@
 import matplotlib as plt
 import numpy as np
 import pandas as pd 
+import os
+import csv
 
-TRACEFILES_FOLDER = 'C:/Users/Rodrigo/Documents/tracefiles'
+TRACEFILES_FOLDER = 'D:/tracefiles'
 
 VIDEOS = [
     ('Tango2','Tango2_3840x2160_60fps_10bit_420.yuv'),
@@ -32,7 +34,46 @@ CONFIGS = [
     ('slower', 'randomaccess_slower.cfg')
 ]
 
+header = ["Video", "QP", "Config", "QT_Depth=0", "QT_Depth=1", "QT_Depth=2", "QT_Depth=3", "QT_Depth=4", "Inter", "Total"]
+
+with open("D:/qtdepths.csv", mode='w', newline='') as output_file:
+    writer = csv.writer(output_file, delimiter=';')
+    writer.writerow(header) 
+
 for video in VIDEOS:
     for qp in QPs:
         for config in CONFIGS:
-            filename = f"./{video[0]}_{qp}_{config[0]}.csv"
+            filename = f"{TRACEFILES_FOLDER}/{video[0]}_{qp}_{config[0]}.csv"
+            count_qtdepths = [0] * 5  # initialize counts for QT_Depth 0 to 4
+            count_inter = 0
+            count_total = 0
+            with open(filename, "r") as file:
+                for line in file:
+                    line = line.strip()
+                    line = line.split(";")
+                    if line[0] == "BlockStat" and "QT_Depth" in line:
+                        actual_level = int(line[7])
+                        for next_line in file:
+                            next_line = next_line.strip()
+                            next_line = next_line.split(";")
+                            if "PredMode" in next_line:
+                                count_total += int(next_line[4]) * int(next_line[5])
+                                if next_line[7] == '0':
+                                    if actual_level == 0:
+                                        count_qtdepths[0] += int(next_line[4]) * int(next_line[5])
+                                    elif actual_level == 1:
+                                        count_qtdepths[1] += int(next_line[4]) * int(next_line[5])
+                                    elif actual_level == 2:
+                                        count_qtdepths[2] += int(next_line[4]) * int(next_line[5])
+                                    elif actual_level == 3:
+                                        count_qtdepths[3] += int(next_line[4]) * int(next_line[5])
+                                    elif actual_level == 4:
+                                        count_qtdepths[4] += int(next_line[4]) * int(next_line[5])
+                                    break
+                            else:
+                                continue
+                count_inter = sum(count_qtdepths)
+                actual_line = [video[0], qp, config[0], count_qtdepths[0], count_qtdepths[1], count_qtdepths[2], count_qtdepths[3], count_qtdepths[4], count_inter, count_total]
+                with open("D:/qtdepths.csv", mode='a', newline='') as saida:
+                    writer = csv.writer(saida, delimiter=';')
+                    writer.writerow(actual_line)
