@@ -1,18 +1,18 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-PATH = 'D:/qtdepths.csv'
+PATH = 'D:/times.csv'
 videos = [
     ["BasketballDrill", "BQMall", "PartyScene", "RaceHorsesC"],
     ["BasketballDrive", "BQTerrace", "Cactus", "MarketPlace"],
     ["CatRobot", "DaylightRoad2", "ParkRunning3"],
     ["Campfire", "FoodMarket4", "Tango2"]
 ]
-qps = [22, 27, 32, 37]
+qps = [22, 27, 32, 37,1]
 qt_cols = ["QT_Depth=0", "QT_Depth=1", "QT_Depth=2", "QT_Depth=3", "QT_Depth=4"]
 
 df = pd.read_csv(PATH, sep=";")
-df = df[(df["Video"].isin(videos[0])) & (df["Config"] == "medium")]
+df = df[(df["Video"].isin(videos[3])) & (df["Config"] == "medium")]
 
 df_grouped = df.groupby("QP")[qt_cols + ["Inter"]].mean()
 
@@ -29,17 +29,18 @@ bottom3 = np.add(bottom2, qt_2)
 bottom4 = np.add(bottom3, qt_1)
 
 plt.figure(figsize=(8, 6))  
-plt.bar(qps, qt_4, width=2, color='#0A2040', edgecolor='black', linewidth=0.9)
-plt.bar(qps, qt_3, width=2, bottom=qt_4, color='#114470', edgecolor='black', linewidth=0.9)
-plt.bar(qps, qt_2, width=2, bottom=bottom2, color='#1B5D92', edgecolor='black', linewidth=0.9)
-plt.bar(qps, qt_1, width=2, bottom=bottom3, color='#71ACD9', edgecolor='black', linewidth=0.9)
-plt.bar(qps, qt_0, width=2, bottom=bottom4, color='#BFD7EA', edgecolor='black', linewidth=0.9)
+plt.bar(qps, qt_4, width=1.5, color="#400A0A", edgecolor='black', linewidth=0.9)
+plt.bar(qps, qt_3, width=1.5, bottom=qt_4, color="#701111", edgecolor='black', linewidth=0.9)
+plt.bar(qps, qt_2, width=1.5, bottom=bottom2, color="#921B1B", edgecolor='black', linewidth=0.9)
+plt.bar(qps, qt_1, width=1.5, bottom=bottom3, color="#D97171", edgecolor='black', linewidth=0.9)
+plt.bar(qps, qt_0, width=1.5, bottom=bottom4, color="#EABFBF", edgecolor='black', linewidth=0.9)
+
 plt.xticks(qps)
-plt.title("Distribuição QT (%) - class_C")
+plt.title("Distribuição QT (%) - class_A1")
 plt.xlabel("QP")
 plt.ylabel("% da Inter")
 ##plt.legend()
 plt.tight_layout()
-plt.savefig("grafico_class_C.png", dpi=300) 
+plt.savefig("time_class_A1.png", dpi=300) 
 plt.close()
 ##plt.show()

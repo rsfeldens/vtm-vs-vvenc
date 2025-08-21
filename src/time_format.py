@@ -1,6 +1,8 @@
 import matplotlib as plt
 import numpy as np
 import pandas as pd 
+import os
+import csv
 
 TIMEFILES_FOLDER = 'C:/Users/Rodrigo/Documents/time-profiles'
 
@@ -32,13 +34,22 @@ CONFIGS = [
     ('slower', 'randomaccess_slower.cfg')
 ]
 
-inter_per_total = []
+header = ["Video", "QP", "Config", "QT_Depth=0", "QT_Depth=1", "QT_Depth=2", "QT_Depth=3", "QT_Depth=4", "Inter", "Total"]
+
+with open("D:/times.csv", mode='w', newline='') as output_file:
+    writer = csv.writer(output_file, delimiter=';')
+    writer.writerow(header) 
 
 for video in VIDEOS:
     for qp in QPs:
         for config in CONFIGS:
             encoder_time = 0
             inter_time = 0
+            qt0 = 0
+            qt1 = 0
+            qt2 = 0
+            qt3 = 0
+            qt4 = 0
             for i in range(5):
                 filename = f"{TIMEFILES_FOLDER}/{video[0]}_{qp}_{config[0]}_{i}.csv"
                 if filename == f"{TIMEFILES_FOLDER}/Tango2_22_faster_2.csv":
@@ -46,13 +57,28 @@ for video in VIDEOS:
                 df = pd.read_csv(filename, sep=';')
                 encoder_time += df.loc[df['Stage'] == 'ENCODER', 'Time(ms)'].values[0]
                 inter_time += df.loc[df['Stage'] == 'INTER', 'Time(ms)'].values[0]
+                qt0 += df.loc[df['Stage'] == 'QT_0', 'Time(ms)'].values[0]
+                qt1 += df.loc[df['Stage'] == 'QT_1', 'Time(ms)'].values[0]
+                qt2 += df.loc[df['Stage'] == 'QT_2', 'Time(ms)'].values[0]
+                qt3 += df.loc[df['Stage'] == 'QT_3', 'Time(ms)'].values[0]
+                qt4 += df.loc[df['Stage'] == 'QT_4', 'Time(ms)'].values[0]
             if video[0] == "Tango2" and qp == 22 and config[0] == 'faster':
                 encoder_time /= 4
                 inter_time /= 4
+                qt0 /= 4
+                qt1 /= 4
+                qt2 /= 4
+                qt3 /= 4
+                qt4 /= 4
             else:
                 encoder_time /= 5  
                 inter_time /= 5
-            print(f"{config[0]},{inter_time / encoder_time * 100}")
-            inter_per_total.append(inter_time / encoder_time * 100)
-
-print(f"Average inter per total: {np.mean(inter_per_total)}%")
+                qt0 /= 5
+                qt1 /= 5
+                qt2 /= 5
+                qt3 /= 5
+                qt4 /= 5
+            actual_line = [video[0], qp, config[0], qt0, qt1, qt2, qt3, qt4, inter_time, encoder_time]
+            with open("D:/times.csv", mode='a', newline='') as saida:
+                writer = csv.writer(saida, delimiter=';')
+                writer.writerow(actual_line)

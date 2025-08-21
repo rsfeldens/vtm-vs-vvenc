@@ -22,18 +22,14 @@ video_order = [
 # Ler CSV (troque para o nome do seu arquivo)
 df = pd.read_csv(PATH, sep=";")
 
-# Criar coluna com a razão Inter/Total
 df["Inter_ratio"] = df["Inter"] / df["Total"]
 
-# Agrupar por Config e Video, calculando média
 mean_df = df.groupby(["Config", "Video"], as_index=False)["Inter_ratio"].mean()
 mean_df["Video"] = pd.Categorical(mean_df["Video"], categories=video_order, ordered=True)
 mean_df = mean_df.sort_values("Video")
 
-# Lista das configs na ordem que você quer (ajuste conforme necessário)
 configs_ordem = ["slower", "slow", "medium", "fast", "faster"]
 
-# Criar um gráfico para cada config
 for config in configs_ordem:
     dados_config = mean_df[mean_df["Config"] == config]
     plt.figure(figsize=(10, 5))
