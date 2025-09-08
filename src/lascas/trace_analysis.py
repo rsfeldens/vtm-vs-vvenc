@@ -3,7 +3,7 @@ import csv
 TRACEFILES_FOLDER = 'D:/tracefiles'
 
 VIDEOS = [
-    #('BasketballDrive','BasketballDrive_1920x1080_50.yuv'),
+    ('BasketballDrive','BasketballDrive_1920x1080_50.yuv'),
     ('BQMall','BQMall_832x480_60.yuv'),
 ]
 
@@ -38,15 +38,15 @@ for video in VIDEOS:
                     line = line.split(";")
                     if line[0] != "BlockStat":
                         continue
-                    #if int(line[1]) > 32:
-                    #    break
+                    if int(line[1]) > 32:
+                        break
                     if "PredMode" in line:
                         if line[7] == '0':
                             inter += int(line[4]) * int(line[5])
                         if line[7] == '1':
                             intra += int(line[4]) * int(line[5])
 
-                    if line[6] == "MVL0": #or line[6] == "MVL1":
+                    if line[6] == "MVL0" or line[6] == "MVL1":
                         mv_x = int(line[7]) & 0b11
                         mv_y = int(line[8]) & 0b11
                         if mv_x == 0 and mv_y == 0:
@@ -54,9 +54,15 @@ for video in VIDEOS:
                         else:
                             fme += int(line[4]) * int(line[5])
 
-                    if line[6] == "AffineMVL0":# or line[6] == "AffineMVL1":
+                    if line[6] == "AffineMVL0" or line[6] == "AffineMVL1":
                         ame += int(line[4]) * int(line[5])
-
+                total = inter + intra
+                inter_modes = ime + fme + ame
+                inter = (inter / total) * 100
+                intra = (intra / total) * 100
+                ime = (ime / inter_modes) * 100
+                fme = (fme / inter_modes) * 100
+                ame = (ame / inter_modes) * 100
                 actual_line = [config[0], video[0], qp, inter, intra, ime, fme, ame]
                 with open("D:/results_table.csv", mode='a', newline='') as saida:
                     writer = csv.writer(saida, delimiter=';')
